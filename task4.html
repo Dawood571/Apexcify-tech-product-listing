@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Product Gallery</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: rgba(15, 15, 35, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(100, 116, 139, 0.2);
+            padding: 1.5rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #e879f9;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .search-bar {
+            position: relative;
+            max-width: 400px;
+            flex: 1;
+            margin: 0 2rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.8rem 1.2rem;
+            border: none;
+            border-radius: 25px;
+            background: rgba(30, 41, 59, 0.7);
+            color: #e2e8f0;
+            font-size: 1rem;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(100, 116, 139, 0.3);
+        }
+
+        .search-input::placeholder {
+            color: rgba(148, 163, 184, 0.8);
+        }
+
+        .search-input:focus {
+            outline: none;
+            background: rgba(30, 41, 59, 0.9);
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+            border-color: rgba(139, 92, 246, 0.5);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .filters {
+            background: rgba(15, 15, 35, 0.6);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(100, 116, 139, 0.2);
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-label {
+            color: #e2e8f0;
+            font-weight: 600;
+            margin-right: 1rem;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border: 2px solid rgba(100, 116, 139, 0.4);
+            background: transparent;
+            color: #e2e8f0;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: rgba(139, 92, 246, 0.2);
+            border-color: rgba(139, 92, 246, 0.6);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.2);
+            color: #e879f9;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .product-card {
+            background: rgba(15, 15, 35, 0.6);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 1.5rem;
+            border: 1px solid rgba(100, 116, 139, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #8b5cf6, #06b6d4, #10b981, #f59e0b, #ef4444);
+            background-size: 200% 200%;
+            border-radius: 20px;
+            z-index: -1;
+            opacity: 0;
+            animation: gradientShift 3s ease infinite;
+            transition: opacity 0.3s ease;
+        }
+
+        .product-card:hover::before {
+            opacity: 1;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .product-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(45deg, #1e293b, #334155);
+            border-radius: 15px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(100, 116, 139, 0.3);
+        }
+
+        .product-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #f1f5f9;
+            margin-bottom: 0.5rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .product-owner {
+            color: rgba(148, 163, 184, 0.9);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+
+        .product-price {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #10b981;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .product-category {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(139, 92, 246, 0.3);
+            color: #e2e8f0;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid rgba(139, 92, 246, 0.5);
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 1rem;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            background: rgba(15, 15, 35, 0.8);
+            border: 2px solid rgba(100, 116, 139, 0.4);
+            color: #e2e8f0;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: rgba(139, 92, 246, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(139, 92, 246, 0.3);
+            border-color: rgba(139, 92, 246, 0.6);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #e2e8f0;
+            font-size: 1.2rem;
+            z-index: 1000;
+        }
+
+        .floating-elements {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .floating-element {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: rgba(139, 92, 246, 0.1);
+            border-radius: 50%;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .search-bar {
+                margin: 0;
+                max-width: none;
+            }
+
+            .product-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-elements"></div>
+    
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">✨ ModernShop</div>
+            <div class="search-bar">
+                <input type="text" class="search-input" placeholder="Search products..." id="searchInput">
+            </div>
+            <div style="color: rgba(148, 163, 184, 0.9); font-weight: 500;">Premium Collection</div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="filters">
+            <div class="filter-group">
+                <span class="filter-label">Categories:</span>
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="electronics">Electronics</button>
+                <button class="filter-btn" data-filter="clothing">Clothing</button>
+                <button class="filter-btn" data-filter="home">Home & Garden</button>
+                <button class="filter-btn" data-filter="sports">Sports</button>
+            </div>
+        </div>
+
+        <div class="product-grid" id="productGrid"></div>
+    </div>
+
+    <div class="navigation">
+        <button class="nav-btn" id="prevBtn">←</button>
+        <button class="nav-btn" id="nextBtn">→</button>
+    </div>
+
+    <div class="loading" id="loading">Loading products...</div>
+
+    <script>
+        // Product data
+        const products = [
+            {
+                id: 1,
+                title: "Gaming Mechanical Keyboard",
+                owner: "GameForge",
+                price: "$189",
+                category: "electronics",
+                emoji: "⌨️",
+                gradient: "linear-gradient(45deg, #374151, #4b5563)"
+            },
+            {
+                id: 2,
+                title: "Vintage Denim Jacket",
+                owner: "RetroWear",
+                price: "$125",
+                category: "clothing",
+                emoji: "🧥",
+                gradient: "linear-gradient(45deg, #581c87, #7c2d12)"
+            },
+            {
+                id: 3,
+                title: "4K Ultra HD Monitor",
+                owner: "DisplayPro",
+                price: "$449",
+                category: "electronics",
+                emoji: "🖥️",
+                gradient: "linear-gradient(45deg, #164e63, #0f766e)"
+            },
+            {
+                id: 4,
+                title: "Premium Tennis Racket",
+                owner: "CourtMaster",
+                price: "$299",
+                category: "sports",
+                emoji: "🎾",
+                gradient: "linear-gradient(45deg, #365314, #166534)"
+            },
+            {
+                id: 5,
+                title: "Smart Air Purifier",
+                owner: "CleanTech",
+                price: "$259",
+                category: "home",
+                emoji: "🌪️",
+                gradient: "linear-gradient(45deg, #14532d, #15803d)"
+            },
+            {
+                id: 6,
+                title: "Wireless Gaming Mouse",
+                owner: "ClickMaster",
+                price: "$79",
+                category: "electronics",
+                emoji: "🖱️",
+                gradient: "linear-gradient(45deg, #451a03, #7c2d12)"
+            },
+            {
+                id: 7,
+                title: "Luxury Cashmere Scarf",
+                owner: "SilkRoad",
+                price: "$149",
+                category: "clothing",
+                emoji: "🧣",
+                gradient: "linear-gradient(45deg, #7c2d12, #92400e)"
+            },
+            {
+                id: 8,
+                title: "Professional Golf Set",
+                owner: "GreenMaster",
+                price: "$599",
+                category: "sports",
+                emoji: "⛳",
+                gradient: "linear-gradient(45deg, #581c87, #6b21a8)"
+            },
+            {
+                id: 9,
+                title: "Smart Robotic Vacuum",
+                owner: "CleanBot",
+                price: "$349",
+                category: "home",
+                emoji: "🤖",
+                gradient: "linear-gradient(45deg, #451a03, #78350f)"
+            },
+            {
+                id: 10,
+                title: "Bluetooth Noise-Cancelling Earbuds",
+                owner: "AudioMax",
+                price: "$199",
+                category: "electronics",
+                emoji: "🎧",
+                gradient: "linear-gradient(45deg, #374151, #4b5563)"
+            },
+            {
+                id: 11,
+                title: "Designer Hoodie",
+                owner: "StreetStyle",
+                price: "$89",
+                category: "clothing",
+                emoji: "👕",
+                gradient: "linear-gradient(45deg, #581c87, #7c2d12)"
+            },
+            {
+                id: 12,
+                title: "Electric Skateboard",
+                owner: "RideElectric",
+                price: "$799",
+                category: "sports",
+                emoji: "🛹",
+                gradient: "linear-gradient(45deg, #365314, #166534)"
+            },
+            {
+                id: 13,
+                title: "Smart LED Light Strip",
+                owner: "LightLab",
+                price: "$45",
+                category: "home",
+                emoji: "💡",
+                gradient: "linear-gradient(45deg, #14532d, #15803d)"
+            },
+            {
+                id: 14,
+                title: "Gaming Graphics Card",
+                owner: "GraphicsForce",
+                price: "$1299",
+                category: "electronics",
+                emoji: "🎮",
+                gradient: "linear-gradient(45deg, #451a03, #7c2d12)"
+            },
+            {
+                id: 15,
+                title: "Premium Sneakers",
+                owner: "StepUp",
+                price: "$179",
+                category: "clothing",
+                emoji: "👟",
+                gradient: "linear-gradient(45deg, #7c2d12, #92400e)"
+            },
+            {
+                id: 16,
+                title: "Fitness Tracker Watch",
+                owner: "FitTech",
+                price: "$249",
+                category: "sports",
+                emoji: "⌚",
+                gradient: "linear-gradient(45deg, #581c87, #6b21a8)"
+            },
+            {
+                id: 17,
+                title: "Aromatherapy Diffuser",
+                owner: "ZenHome",
+                price: "$69",
+                category: "home",
+                emoji: "🕯️",
+                gradient: "linear-gradient(45deg, #451a03, #78350f)"
+            },
+            {
+                id: 18,
+                title: "Portable Power Bank",
+                owner: "PowerPlus",
+                price: "$59",
+                category: "electronics",
+                emoji: "🔋",
+                gradient: "linear-gradient(45deg, #374151, #4b5563)"
+            }
+        ];
+
+        let currentPage = 0;
+        const itemsPerPage = 6;
+        let filteredProducts = [...products];
+        let currentFilter = 'all';
+
+        // Initialize GSAP
+        gsap.registerPlugin();
+
+        // Create floating elements
+        function createFloatingElements() {
+            const container = document.querySelector('.floating-elements');
+            for (let i = 0; i < 20; i++) {
+                const element = document.createElement('div');
+                element.className = 'floating-element';
+                element.style.left = Math.random() * 100 + '%';
+                element.style.top = Math.random() * 100 + '%';
+                container.appendChild(element);
+
+                gsap.to(element, {
+                    y: '-100vh',
+                    rotation: 360,
+                    duration: Math.random() * 10 + 10,
+                    repeat: -1,
+                    ease: 'none',
+                    delay: Math.random() * 5
+                });
+            }
+        }
+
+        // Animate header on load
+        function animateHeader() {
+            gsap.from('.header', {
+                y: -100,
+                opacity: 0,
+                duration: 1,
+                ease: 'bounce.out'
+            });
+
+            gsap.from('.logo', {
+                scale: 0,
+                rotation: 360,
+                duration: 1,
+                delay: 0.3,
+                ease: 'back.out(1.7)'
+            });
+
+            gsap.from('.search-bar', {
+                x: 100,
+                opacity: 0,
+                duration: 0.8,
+                delay: 0.5,
+                ease: 'power2.out'
+            });
+        }
+
+        // Create product card HTML
+        function createProductCard(product) {
+            return `
+                <div class="product-card" data-category="${product.category}">
+                    <div class="product-category">${product.category}</div>
+                    <div class="product-image" style="background: ${product.gradient};">
+                        <span style="font-size: 4rem;">${product.emoji}</span>
+                    </div>
+                    <div class="product-title">${product.title}</div>
+                    <div class="product-owner">by ${product.owner}</div>
+                    <div class="product-price">${product.price}</div>
+                </div>
+            `;
+        }
+
+        // Render products with animation
+        function renderProducts() {
+            const grid = document.getElementById('productGrid');
+            const startIndex = currentPage * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const productsToShow = filteredProducts.slice(startIndex, endIndex);
+
+            // Fade out existing cards
+            gsap.to('.product-card', {
+                opacity: 0,
+                y: 50,
+                duration: 0.3,
+                stagger: 0.1,
+                onComplete: () => {
+                    grid.innerHTML = productsToShow.map(createProductCard).join('');
+                    
+                    // Animate new cards in
+                    gsap.fromTo('.product-card', 
+                        {
+                            opacity: 0,
+                            y: 100,
+                            scale: 0.8
+                        },
+                        {
+                            opacity: 1,
+                            y: 0,
+                            scale: 1,
+                            duration: 0.6,
+                            stagger: 0.15,
+                            ease: 'back.out(1.7)'
+                        }
+                    );
+
+                    // Add hover animations
+                    document.querySelectorAll('.product-card').forEach(card => {
+                        card.addEventListener('mouseenter', () => {
+                            gsap.to(card, {
+                                rotationY: 10,
+                                rotationX: 5,
+                                duration: 0.3,
+                                ease: 'power2.out'
+                            });
+                        });
+
+                        card.addEventListener('mouseleave', () => {
+                            gsap.to(card, {
+                                rotationY: 0,
+                                rotationX: 0,
+                                duration: 0.3,
+                                ease: 'power2.out'
+                            });
+                        });
+
+                        card.addEventListener('click', () => {
+                            gsap.to(card, {
+                                scale: 0.95,
+                                duration: 0.1,
+                                yoyo: true,
+                                repeat: 1,
+                                ease: 'power2.inOut'
+                            });
+                        });
+                    });
+                }
+            });
+
+            updateNavigation();
+        }
+
+        // Update navigation buttons
+        function updateNavigation() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            prevBtn.disabled = currentPage === 0;
+            nextBtn.disabled = (currentPage + 1) * itemsPerPage >= filteredProducts.length;
+        }
+
+        // Filter products
+        function filterProducts(category) {
+            currentFilter = category;
+            filteredProducts = category === 'all' ? [...products] : products.filter(p => p.category === category);
+            currentPage = 0;
+            renderProducts();
+
+            // Update filter buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.filter === category) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+
+        // Search functionality
+        function searchProducts(query) {
+            const searchTerm = query.toLowerCase();
+            filteredProducts = products.filter(product => {
+                const matchesSearch = product.title.toLowerCase().includes(searchTerm) ||
+                                    product.owner.toLowerCase().includes(searchTerm);
+                const matchesCategory = currentFilter === 'all' || product.category === currentFilter;
+                return matchesSearch && matchesCategory;
+            });
+            currentPage = 0;
+            renderProducts();
+        }
+
+        // Event listeners
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            if (currentPage > 0) {
+                currentPage--;
+                renderProducts();
+            }
+        });
+
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            if ((currentPage + 1) * itemsPerPage < filteredProducts.length) {
+                currentPage++;
+                renderProducts();
+            }
+        });
+
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterProducts(btn.dataset.filter);
+            });
+        });
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            searchProducts(e.target.value);
+        });
+
+        // Animate filters
+        function animateFilters() {
+            gsap.from('.filters', {
+                y: 50,
+                opacity: 0,
+                duration: 0.8,
+                delay: 0.8,
+                ease: 'power2.out'
+            });
+
+            gsap.from('.filter-btn', {
+                scale: 0,
+                opacity: 0,
+                duration: 0.5,
+                stagger: 0.1,
+                delay: 1,
+                ease: 'back.out(1.7)'
+            });
+        }
+
+        // Initialize everything
+        function init() {
+            createFloatingElements();
+            animateHeader();
+            animateFilters();
+            
+            setTimeout(() => {
+                renderProducts();
+            }, 1200);
+
+            // Animate navigation
+            gsap.from('.navigation', {
+                y: 100,
+                opacity: 0,
+                duration: 0.8,
+                delay: 1.5,
+                ease: 'power2.out'
+            });
+        }
+
+        // Start the app
+        init();
+
+        // Add some interactive particles on click
+        document.addEventListener('click', (e) => {
+            const particle = document.createElement('div');
+            particle.style.position = 'absolute';
+            particle.style.left = e.clientX + 'px';
+            particle.style.top = e.clientY + 'px';
+            particle.style.width = '10px';
+            particle.style.height = '10px';
+            particle.style.background = 'rgba(139, 92, 246, 0.7)';
+            particle.style.borderRadius = '50%';
+            particle.style.pointerEvents = 'none';
+            particle.style.zIndex = '1000';
+            document.body.appendChild(particle);
+
+            gsap.to(particle, {
+                x: (Math.random() - 0.5) * 200,
+                y: (Math.random() - 0.5) * 200,
+                opacity: 0,
+                scale: 0,
+                duration: 1,
+                ease: 'power2.out',
+                onComplete: () => particle.remove()
+            });
+        });
+    </script>
+</body>
+</html>
